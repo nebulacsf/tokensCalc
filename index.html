@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Costos de Tokens de IA</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            900: '#4c1d95',
+                        },
+                        dark: {
+                            bg: '#090d16',
+                            card: '#111827',
+                            border: '#1f2937',
+                            input: '#1a2234',
+                            accent: '#1e293b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #090d16;
+            color: #f3f4f6;
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+    <!-- Navbar / Header -->
+    <header class="border-b border-gray-800 bg-dark-card/60 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-brand-400">
+                        tokensCalc
+                    </h1>
+                    <p class="text-xs text-gray-400">Calculadora de Consumo de Tokens de IA</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-brand-500/10 text-brand-400 border border-brand-500/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-brand-400 mr-1.5 animate-pulse"></span>
+                    OpenRouter Compatible
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
+
+        <!-- Banner Presets Rápidos -->
+        <section class="bg-dark-card border border-dark-border rounded-2xl p-5 shadow-xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    <h2 class="text-sm font-semibold text-gray-300 uppercase tracking-wider">Presets de Modelos Populares (OpenRouter)</h2>
+                </div>
+                <span class="text-xs text-gray-500">Precios por 1 Million (1M) Tokens en USD</span>
+            </div>
+
+            <!-- Botones de presets -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3" id="presets-container">
+                <!-- Javascript poblará esto -->
+            </div>
+        </section>
+
+        <!-- Panel de Configuración de Precios & Configuración Custom -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <!-- Entradas Principales (4 cols) -->
+            <div class="lg:col-span-4 bg-dark-card border border-dark-border rounded-2xl p-6 shadow-xl space-y-6">
+                <div class="border-b border-dark-border pb-4">
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                        <span>🏷️</span> Tarifas del Modelo
+                    </h2>
+                    <p class="text-xs text-gray-400 mt-1">Configura el costo en dólares por cada 1M de tokens</p>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Model Selected Name Label -->
+                    <div class="bg-dark-accent/50 border border-gray-800 rounded-xl p-3 flex justify-between items-center">
+                        <span class="text-xs text-gray-400">Modelo Activo:</span>
+                        <span id="active-model-name" class="text-xs font-mono font-bold text-brand-400">Personalizado</span>
+                    </div>
+
+                    <!-- Input Price -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1 flex justify-between">
+                            <span>Tokens de Entrada (Prompt)</span>
+                            <span class="text-brand-400">/ 1M tokens</span>
+                        </label>
+                        <div class="relative rounded-xl shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500 font-mono text-sm">$</div>
+                            <input type="number" step="0.0001" id="input-price" value="0.30"
+                                class="w-full pl-8 pr-4 py-2.5 bg-dark-input border border-dark-border rounded-xl text-white font-mono text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Output Price -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1 flex justify-between">
+                            <span>Tokens de Salida (Completion)</span>
+                            <span class="text-indigo-400">/ 1M tokens</span>
+                        </label>
+                        <div class="relative rounded-xl shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500 font-mono text-sm">$</div>
+                            <input type="number" step="0.0001" id="output-price" value="1.20"
+                                class="w-full pl-8 pr-4 py-2.5 bg-dark-input border border-dark-border rounded-xl text-white font-mono text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modificador de Tokens Personalizados -->
+                <div class="pt-4 border-t border-dark-border space-y-4">
+                    <button id="toggle-custom-tokens" class="w-full flex items-center justify-between text-xs text-gray-400 hover:text-white transition">
+                        <span class="font-medium flex items-center gap-1.5">
+                            ⚙️ Personalizar tamaño de tokens
+                        </span>
+                        <span id="toggle-icon">▼</span>
+                    </button>
+
+                    <div id="custom-tokens-panel" class="hidden space-y-4 pt-2">
+                        <p class="text-xs text-gray-500">Ajusta las cantidades base para calibrar a tu flujo exacto:</p>
+
+                        <!-- Rápida Custom -->
+                        <div class="p-3 bg-dark-input/50 rounded-xl border border-gray-800 space-y-2">
+                            <span class="text-xs font-semibold text-emerald-400">1. Consulta Rápida</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[10px] text-gray-400">In Tokens</label>
+                                    <input type="number" id="quick-in" value="4000" class="w-full px-2 py-1 bg-dark-bg border border-gray-700 rounded text-xs font-mono text-white">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-gray-400">Out Tokens</label>
+                                    <input type="number" id="quick-out" value="400" class="w-full px-2 py-1 bg-dark-bg border border-gray-700 rounded text-xs font-mono text-white">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Estándar Custom -->
+                        <div class="p-3 bg-dark-input/50 rounded-xl border border-gray-800 space-y-2">
+                            <span class="text-xs font-semibold text-brand-400">2. Tarea Estándar</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[10px] text-gray-400">In Tokens</label>
+                                    <input type="number" id="std-in" value="12000" class="w-full px-2 py-1 bg-dark-bg border border-gray-700 rounded text-xs font-mono text-white">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-gray-400">Out Tokens</label>
+                                    <input type="number" id="std-out" value="1200" class="w-full px-2 py-1 bg-dark-bg border border-gray-700 rounded text-xs font-mono text-white">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Compleja Custom -->
+                        <div class="p-3 bg-dark-input/50 rounded-xl border border-gray-800 space-y-2">
+                            <span class="text-xs font-semibold text-purple-400">3. Tarea Compleja</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="text-[10px] text-gray-400">In Tokens</label>
+                                    <input type="number" id="cx-in" value="40000" class="w-full px-2 py-1 bg-dark-bg border border-gray-700 rounded text-xs font-mono text-white">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] text-gray-400">Out Tokens</label>
+                                    <input type="number" id="cx-out" value="3000" class="w-full px-2 py-1 bg-dark-bg border border-gray-700 rounded text-xs font-mono text-white">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen rápido de proporción -->
+                <div class="p-3 rounded-xl bg-gray-900/50 border border-gray-800 text-xs text-gray-400">
+                    💡 <span class="text-gray-300 font-medium">Tip de OpenCode:</span> El ~85-90% del costo suele provenir de los tokens de entrada debido a la re-lectura continua de contexto del repositorio.
+                </div>
+            </div>
+
+            <!-- Dashboard de Tarjetas de Perfiles (8 cols) -->
+            <div class="lg:col-span-8 space-y-6">
+
+                <!-- Contenedor de 3 Tarjetas de Perfil -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                    <!-- Perfil 1: Rápida -->
+                    <div class="bg-dark-card border border-dark-border hover:border-emerald-500/40 transition-all rounded-2xl p-5 shadow-xl flex flex-col justify-between relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl group-hover:bg-emerald-500/10 transition-all"></div>
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                    ⚡ Consulta Rápida
+                                </span>
+                            </div>
+                            <p class="text-xs text-gray-400 mb-4">Fixes simples, sintaxis, 1 archivo o función.</p>
+
+                            <!-- Badges Tokens -->
+                            <div class="flex gap-2 font-mono text-[11px] mb-6">
+                                <span class="px-2 py-1 rounded bg-dark-input text-gray-300">In: <strong id="card1-in-val">4k</strong></span>
+                                <span class="px-2 py-1 rounded bg-dark-input text-gray-300">Out: <strong id="card1-out-val">400</strong></span>
+                            </div>
+
+                            <!-- Costo Principal 1 Petición -->
+                            <div class="bg-dark-bg/80 border border-dark-border rounded-xl p-3 mb-4">
+                                <span class="text-[10px] uppercase tracking-wider text-gray-400 block mb-0.5">Costo por 1 consulta</span>
+                                <div class="text-xl font-bold font-mono text-emerald-400" id="card1-cost-1">$0.0000</div>
+
+                                <!-- Mini Bar Ratio -->
+                                <div class="w-full bg-gray-800 h-1.5 rounded-full mt-2 overflow-hidden flex" title="Verde: Input, Azul: Output">
+                                    <div id="card1-bar-in" class="bg-brand-500 h-full" style="width: 70%"></div>
+                                    <div id="card1-bar-out" class="bg-indigo-400 h-full" style="width: 30%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Desglose por Lotes -->
+                            <div class="space-y-2 font-mono text-xs text-gray-300 border-t border-dark-border pt-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">10 consultas:</span>
+                                    <span id="card1-cost-10" class="font-semibold">$0.000</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">50 consultas:</span>
+                                    <span id="card1-cost-50" class="font-semibold">$0.000</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">100 consultas:</span>
+                                    <span id="card1-cost-100" class="font-semibold text-emerald-400">$0.000</span>
+                                </div>
+                                <div class="flex justify-between text-sm pt-1 border-t border-gray-800">
+                                    <span class="text-gray-400 font-sans text-xs">1,000 consultas:</span>
+                                    <span id="card1-cost-1000" class="font-bold text-emerald-400">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Perfil 2: Estándar (Destacada) -->
+                    <div class="bg-dark-card border-2 border-brand-500/50 hover:border-brand-500 transition-all rounded-2xl p-5 shadow-2xl flex flex-col justify-between relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-28 h-28 bg-brand-500/10 rounded-full blur-2xl group-hover:bg-brand-500/20 transition-all"></div>
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30">
+                                    🛠️ Tarea Estándar
+                                </span>
+                                <span class="text-[10px] text-brand-400 uppercase font-semibold">Más Común</span>
+                            </div>
+                            <p class="text-xs text-gray-400 mb-4">Refactorización, funciones y contexto medio.</p>
+
+                            <!-- Badges Tokens -->
+                            <div class="flex gap-2 font-mono text-[11px] mb-6">
+                                <span class="px-2 py-1 rounded bg-dark-input text-gray-300">In: <strong id="card2-in-val">12k</strong></span>
+                                <span class="px-2 py-1 rounded bg-dark-input text-gray-300">Out: <strong id="card2-out-val">1.2k</strong></span>
+                            </div>
+
+                            <!-- Costo Principal 1 Petición -->
+                            <div class="bg-dark-bg/80 border border-brand-500/30 rounded-xl p-3 mb-4">
+                                <span class="text-[10px] uppercase tracking-wider text-gray-400 block mb-0.5">Costo por 1 consulta</span>
+                                <div class="text-2xl font-bold font-mono text-brand-300" id="card2-cost-1">$0.0000</div>
+
+                                <!-- Mini Bar Ratio -->
+                                <div class="w-full bg-gray-800 h-1.5 rounded-full mt-2 overflow-hidden flex">
+                                    <div id="card2-bar-in" class="bg-brand-500 h-full" style="width: 70%"></div>
+                                    <div id="card2-bar-out" class="bg-indigo-400 h-full" style="width: 30%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Desglose por Lotes -->
+                            <div class="space-y-2 font-mono text-xs text-gray-300 border-t border-dark-border pt-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">10 consultas:</span>
+                                    <span id="card2-cost-10" class="font-semibold">$0.000</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">50 consultas:</span>
+                                    <span id="card2-cost-50" class="font-semibold">$0.000</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">100 consultas:</span>
+                                    <span id="card2-cost-100" class="font-semibold text-brand-300">$0.000</span>
+                                </div>
+                                <div class="flex justify-between text-sm pt-1 border-t border-gray-800">
+                                    <span class="text-gray-400 font-sans text-xs">1,000 consultas:</span>
+                                    <span id="card2-cost-1000" class="font-bold text-brand-300">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Perfil 3: Compleja -->
+                    <div class="bg-dark-card border border-dark-border hover:border-purple-500/40 transition-all rounded-2xl p-5 shadow-xl flex flex-col justify-between relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-xl group-hover:bg-purple-500/10 transition-all"></div>
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                                    🚀 Tarea Compleja
+                                </span>
+                            </div>
+                            <p class="text-xs text-gray-400 mb-4">Multi-archivo, auditorías, código extenso.</p>
+
+                            <!-- Badges Tokens -->
+                            <div class="flex gap-2 font-mono text-[11px] mb-6">
+                                <span class="px-2 py-1 rounded bg-dark-input text-gray-300">In: <strong id="card3-in-val">40k</strong></span>
+                                <span class="px-2 py-1 rounded bg-dark-input text-gray-300">Out: <strong id="card3-out-val">3k</strong></span>
+                            </div>
+
+                            <!-- Costo Principal 1 Petición -->
+                            <div class="bg-dark-bg/80 border border-dark-border rounded-xl p-3 mb-4">
+                                <span class="text-[10px] uppercase tracking-wider text-gray-400 block mb-0.5">Costo por 1 consulta</span>
+                                <div class="text-xl font-bold font-mono text-purple-400" id="card3-cost-1">$0.0000</div>
+
+                                <!-- Mini Bar Ratio -->
+                                <div class="w-full bg-gray-800 h-1.5 rounded-full mt-2 overflow-hidden flex">
+                                    <div id="card3-bar-in" class="bg-brand-500 h-full" style="width: 70%"></div>
+                                    <div id="card3-bar-out" class="bg-indigo-400 h-full" style="width: 30%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Desglose por Lotes -->
+                            <div class="space-y-2 font-mono text-xs text-gray-300 border-t border-dark-border pt-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">10 consultas:</span>
+                                    <span id="card3-cost-10" class="font-semibold">$0.000</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">50 consultas:</span>
+                                    <span id="card3-cost-50" class="font-semibold">$0.000</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">100 consultas:</span>
+                                    <span id="card3-cost-100" class="font-semibold text-purple-400">$0.000</span>
+                                </div>
+                                <div class="flex justify-between text-sm pt-1 border-t border-gray-800">
+                                    <span class="text-gray-400 font-sans text-xs">1,000 consultas:</span>
+                                    <span id="card3-cost-1000" class="font-bold text-purple-400">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Tabla Comparativa Detallada de Costos -->
+                <div class="bg-dark-card border border-dark-border rounded-2xl p-6 shadow-xl overflow-x-auto">
+                    <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                        📊 Tabla Comparativa por Volumen de Peticiones
+                    </h3>
+
+                    <table class="w-full text-left font-mono text-xs">
+                        <thead>
+                            <tr class="border-b border-dark-border text-gray-400 uppercase text-[10px]">
+                                <th class="pb-3 font-sans">Volumen</th>
+                                <th class="pb-3 text-emerald-400 font-sans">Consulta Rápida</th>
+                                <th class="pb-3 text-brand-400 font-sans">Tarea Estándar</th>
+                                <th class="pb-3 text-purple-400 font-sans">Tarea Compleja</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-800/60 text-gray-200">
+                            <tr>
+                                <td class="py-3 text-gray-400 font-sans font-medium">1 Petición</td>
+                                <td class="py-3 text-emerald-400" id="tbl-1-q">$0.0000</td>
+                                <td class="py-3 text-brand-300 font-bold" id="tbl-1-s">$0.0000</td>
+                                <td class="py-3 text-purple-400" id="tbl-1-c">$0.0000</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 text-gray-400 font-sans font-medium">10 Peticiones</td>
+                                <td class="py-3" id="tbl-10-q">$0.000</td>
+                                <td class="py-3 text-brand-300 font-bold" id="tbl-10-s">$0.000</td>
+                                <td class="py-3" id="tbl-10-c">$0.000</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 text-gray-400 font-sans font-medium">50 Peticiones</td>
+                                <td class="py-3" id="tbl-50-q">$0.00</td>
+                                <td class="py-3 text-brand-300 font-bold" id="tbl-50-s">$0.00</td>
+                                <td class="py-3" id="tbl-50-c">$0.00</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 text-gray-400 font-sans font-medium">100 Peticiones</td>
+                                <td class="py-3" id="tbl-100-q">$0.00</td>
+                                <td class="py-3 text-brand-300 font-bold" id="tbl-100-s">$0.00</td>
+                                <td class="py-3" id="tbl-100-c">$0.00</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 text-gray-400 font-sans font-medium">1,000 Peticiones</td>
+                                <td class="py-3 text-emerald-400 font-bold" id="tbl-1000-q">$0.00</td>
+                                <td class="py-3 text-brand-300 font-bold text-sm" id="tbl-1000-s">$0.00</td>
+                                <td class="py-3 text-purple-400 font-bold" id="tbl-1000-c">$0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- App Logic -->
+    <script>
+        // Preset Models Data
+        const PRESETS = [
+            { id: 'qwen-coder-32b', name: 'Qwen 2.5 Coder 32B', in: 0.07, out: 0.16, badge: 'Popular' },
+            { id: 'qwen-37-flash', name: 'Qwen 3.7 Flash', in: 0.10, out: 0.30, badge: 'Rápido' },
+            { id: 'deepseek-v4-flash', name: 'DeepSeek V4 / Flash', in: 0.14, out: 0.28, badge: 'Económico' },
+            { id: 'glm-53-flash', name: 'GLM 5.3 Flash', in: 0.10, out: 0.20, badge: 'Agentes' },
+            { id: 'claude-35-sonnet', name: 'Claude 3.5 Sonnet', in: 3.00, out: 15.00, badge: 'Frontera' }
+        ];
+
+        // State & Elements
+        const inputPriceEl = document.getElementById('input-price');
+        const outputPriceEl = document.getElementById('output-price');
+        const activeModelLabel = document.getElementById('active-model-name');
+        const presetsContainer = document.getElementById('presets-container');
+
+        // Custom Tokens Panel Elements
+        const toggleCustomBtn = document.getElementById('toggle-custom-tokens');
+        const customTokensPanel = document.getElementById('custom-tokens-panel');
+        const toggleIcon = document.getElementById('toggle-icon');
+
+        const quickInEl = document.getElementById('quick-in');
+        const quickOutEl = document.getElementById('quick-out');
+        const stdInEl = document.getElementById('std-in');
+        const stdOutEl = document.getElementById('std-out');
+        const cxInEl = document.getElementById('cx-in');
+        const cxOutEl = document.getElementById('cx-out');
+
+        // Initialize App
+        function init() {
+            renderPresets();
+            attachEventListeners();
+            calculateCosts();
+        }
+
+        // Render Presets Buttons
+        function renderPresets() {
+            presetsContainer.innerHTML = PRESETS.map(preset => `
+                <button
+                    onclick="selectPreset('${preset.id}')"
+                    class="preset-btn text-left p-3 rounded-xl border border-dark-border bg-dark-bg/60 hover:bg-dark-accent hover:border-brand-500/50 transition-all flex flex-col justify-between group">
+                    <div>
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="text-xs font-semibold text-gray-200 group-hover:text-brand-300 transition-colors">${preset.name}</span>
+                        </div>
+                        <div class="text-[10px] font-mono text-gray-400">
+                            In: $${preset.in} / Out: $${preset.out}
+                        </div>
+                    </div>
+                    <span class="mt-2 text-[9px] w-fit px-1.5 py-0.5 rounded bg-gray-800 text-gray-300 font-medium border border-gray-700">${preset.badge}</span>
+                </button>
+            `).join('');
+        }
+
+        // Select Preset
+        window.selectPreset = function(id) {
+            const model = PRESETS.find(p => p.id === id);
+            if (!model) return;
+
+            inputPriceEl.value = model.in;
+            outputPriceEl.value = model.out;
+            activeModelLabel.textContent = model.name;
+
+            calculateCosts();
+        };
+
+        // Attach Event Listeners
+        function attachEventListeners() {
+            [inputPriceEl, outputPriceEl, quickInEl, quickOutEl, stdInEl, stdOutEl, cxInEl, cxOutEl].forEach(el => {
+                el.addEventListener('input', () => {
+                    activeModelLabel.textContent = 'Personalizado';
+                    calculateCosts();
+                });
+            });
+
+            toggleCustomBtn.addEventListener('click', () => {
+                customTokensPanel.classList.toggle('hidden');
+                toggleIcon.textContent = customTokensPanel.classList.contains('hidden') ? '▼' : '▲';
+            });
+        }
+
+        // Format Currency Helper
+        function formatUSD(amount, decimals = 4) {
+            if (amount < 0.0001 && amount > 0) {
+                return '$' + amount.toFixed(6);
+            }
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            }).format(amount);
+        }
+
+        // Format K tokens helper (e.g. 12000 -> 12k)
+        function formatTokens(val) {
+            return val >= 1000 ? (val / 1000).toFixed(1).replace('.0', '') + 'k' : val;
+        }
+
+        // Calculate Single Cost
+        function calcSingleCost(inTokens, outTokens, priceInPerM, priceOutPerM) {
+            const costIn = (inTokens / 1000000) * priceInPerM;
+            const costOut = (outTokens / 1000000) * priceOutPerM;
+            return {
+                total: costIn + costOut,
+                costIn,
+                costOut,
+                ratioIn: (costIn / (costIn + costOut)) * 100 || 50
+            };
+        }
+
+        // Main Calculation Function
+        function calculateCosts() {
+            const priceIn = parseFloat(inputPriceEl.value) || 0;
+            const priceOut = parseFloat(outputPriceEl.value) || 0;
+
+            // Gather profiles tokens
+            const profiles = {
+                quick: {
+                    in: parseInt(quickInEl.value) || 0,
+                    out: parseInt(quickOutEl.value) || 0
+                },
+                std: {
+                    in: parseInt(stdInEl.value) || 0,
+                    out: parseInt(stdOutEl.value) || 0
+                },
+                cx: {
+                    in: parseInt(cxInEl.value) || 0,
+                    out: parseInt(cxOutEl.value) || 0
+                }
+            };
+
+            // Calculate profiles
+            const resQuick = calcSingleCost(profiles.quick.in, profiles.quick.out, priceIn, priceOut);
+            const resStd = calcSingleCost(profiles.std.in, profiles.std.out, priceIn, priceOut);
+            const resCx = calcSingleCost(profiles.cx.in, profiles.cx.out, priceIn, priceOut);
+
+            // Update Badges Values
+            document.getElementById('card1-in-val').textContent = formatTokens(profiles.quick.in);
+            document.getElementById('card1-out-val').textContent = formatTokens(profiles.quick.out);
+            document.getElementById('card2-in-val').textContent = formatTokens(profiles.std.in);
+            document.getElementById('card2-out-val').textContent = formatTokens(profiles.std.out);
+            document.getElementById('card3-in-val').textContent = formatTokens(profiles.cx.in);
+            document.getElementById('card3-out-val').textContent = formatTokens(profiles.cx.out);
+
+            // Update Card 1 (Quick)
+            document.getElementById('card1-cost-1').textContent = formatUSD(resQuick.total, 5);
+            document.getElementById('card1-cost-10').textContent = formatUSD(resQuick.total * 10, 4);
+            document.getElementById('card1-cost-50').textContent = formatUSD(resQuick.total * 50, 3);
+            document.getElementById('card1-cost-100').textContent = formatUSD(resQuick.total * 100, 3);
+            document.getElementById('card1-cost-1000').textContent = formatUSD(resQuick.total * 1000, 2);
+            document.getElementById('card1-bar-in').style.width = `${resQuick.ratioIn}%`;
+            document.getElementById('card1-bar-out').style.width = `${100 - resQuick.ratioIn}%`;
+
+            // Update Card 2 (Standard)
+            document.getElementById('card2-cost-1').textContent = formatUSD(resStd.total, 5);
+            document.getElementById('card2-cost-10').textContent = formatUSD(resStd.total * 10, 4);
+            document.getElementById('card2-cost-50').textContent = formatUSD(resStd.total * 50, 3);
+            document.getElementById('card2-cost-100').textContent = formatUSD(resStd.total * 100, 3);
+            document.getElementById('card2-cost-1000').textContent = formatUSD(resStd.total * 1000, 2);
+            document.getElementById('card2-bar-in').style.width = `${resStd.ratioIn}%`;
+            document.getElementById('card2-bar-out').style.width = `${100 - resStd.ratioIn}%`;
+
+            // Update Card 3 (Complex)
+            document.getElementById('card3-cost-1').textContent = formatUSD(resCx.total, 5);
+            document.getElementById('card3-cost-10').textContent = formatUSD(resCx.total * 10, 4);
+            document.getElementById('card3-cost-50').textContent = formatUSD(resCx.total * 50, 3);
+            document.getElementById('card3-cost-100').textContent = formatUSD(resCx.total * 100, 3);
+            document.getElementById('card3-cost-1000').textContent = formatUSD(resCx.total * 1000, 2);
+            document.getElementById('card3-bar-in').style.width = `${resCx.ratioIn}%`;
+            document.getElementById('card3-bar-out').style.width = `${100 - resCx.ratioIn}%`;
+
+            // Update Summary Table
+            document.getElementById('tbl-1-q').textContent = formatUSD(resQuick.total, 5);
+            document.getElementById('tbl-1-s').textContent = formatUSD(resStd.total, 5);
+            document.getElementById('tbl-1-c').textContent = formatUSD(resCx.total, 5);
+
+            document.getElementById('tbl-10-q').textContent = formatUSD(resQuick.total * 10, 4);
+            document.getElementById('tbl-10-s').textContent = formatUSD(resStd.total * 10, 4);
+            document.getElementById('tbl-10-c').textContent = formatUSD(resCx.total * 10, 4);
+
+            document.getElementById('tbl-50-q').textContent = formatUSD(resQuick.total * 50, 3);
+            document.getElementById('tbl-50-s').textContent = formatUSD(resStd.total * 50, 3);
+            document.getElementById('tbl-50-c').textContent = formatUSD(resCx.total * 50, 3);
+
+            document.getElementById('tbl-100-q').textContent = formatUSD(resQuick.total * 100, 2);
+            document.getElementById('tbl-100-s').textContent = formatUSD(resStd.total * 100, 2);
+            document.getElementById('tbl-100-c').textContent = formatUSD(resCx.total * 100, 2);
+
+            document.getElementById('tbl-1000-q').textContent = formatUSD(resQuick.total * 1000, 2);
+            document.getElementById('tbl-1000-s').textContent = formatUSD(resStd.total * 1000, 2);
+            document.getElementById('tbl-1000-c').textContent = formatUSD(resCx.total * 1000, 2);
+        }
+
+        // Run on load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
